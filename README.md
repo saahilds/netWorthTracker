@@ -1,1 +1,78 @@
-# netWorthTracker
+# Net Worth Tracker
+
+A starter monorepo scaffold for a personal net worth app with:
+
+- Web dashboard (Next.js)
+- Mobile dashboard shell (Expo React Native)
+- Shared TypeScript domain models and dummy portfolio data
+
+## Budget options (US-only, Plaid-first)
+
+These are practical ranges for a side project. Exact pricing changes by usage, institution coverage, and vendor plans.
+
+### 1) Lean MVP (lowest spend)
+
+- Aggregation: Plaid starter plan
+- Market data: free/delayed endpoints where possible
+- Car value: monthly lookup API call (low volume)
+- Infra: Vercel hobby + low-cost managed Postgres
+
+Typical monthly spend: **~$25-$100**
+
+Tradeoffs:
+
+- Some institutions may have weaker coverage
+- More reliance on delayed data
+- Fewer premium observability/security add-ons
+
+### 2) Balanced (best value for most users)
+
+- Aggregation: Plaid paid tier with broader access
+- Market data: reliable paid delayed/near-real-time feed
+- Jobs + alerting platform for sync reliability
+- Managed Postgres with backups and better monitoring
+
+Typical monthly spend: **~$150-$500**
+
+Tradeoffs:
+
+- Good reliability and UX for a personal app
+- Still may need targeted fallback integrations for edge institutions
+
+### 3) Premium (best experience)
+
+- Plaid + one fallback data connector where needed
+- Higher-tier market data (fresher updates, stronger SLAs)
+- Robust job orchestration, monitoring, alerting, audit logs
+- Production-grade managed DB, secrets, and security controls
+
+Typical monthly spend: **~$600-$2,500+**
+
+Tradeoffs:
+
+- Highest reliability and freshness
+- Better support for multi-user expansion
+- More engineering overhead and vendor complexity
+
+## Repository layout
+
+```text
+apps/
+  web/        Next.js app (dashboard + drill-down starter)
+  mobile/     Expo app (dashboard shell)
+packages/
+  shared/     Shared types, dummy data, and analytics helpers
+```
+
+## Quick start
+
+```bash
+npm install
+npm run dev:web
+```
+
+For mobile:
+
+```bash
+npm run dev:mobile
+```
