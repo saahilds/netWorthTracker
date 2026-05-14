@@ -79,6 +79,9 @@ For mobile:
 npm run dev:mobile
 ```
 
+If Expo cannot resolve `../../App` in a monorepo, ensure the mobile workspace uses
+`apps/mobile/index.ts` as the entrypoint (already configured in this repo).
+
 ## Cloud agent bootstrap
 
 ```bash
