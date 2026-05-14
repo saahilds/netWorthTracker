@@ -61,10 +61,7 @@ export function AssetClassPieChart({ totals }: AssetClassPieChartProps) {
             ))}
           </Pie>
           <Tooltip
-            formatter={(value: number, _name, payload) => [
-              currencyFormatter.format(value),
-              payload?.payload?.label
-            ]}
+            formatter={(value) => currencyFormatter.format(Number(value ?? 0))}
             contentStyle={{ borderRadius: "0.75rem", borderColor: "#cbd5e1" }}
           />
         </PieChart>

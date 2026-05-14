@@ -200,7 +200,7 @@ export function NetWorthTrendChart({ history, accountLabels }: NetWorthTrendChar
             width={95}
           />
           <Tooltip
-            formatter={(value: number) => currencyFormatter.format(value)}
+            formatter={(value) => currencyFormatter.format(Number(value ?? 0))}
             labelFormatter={(_, payload) =>
               payload?.[0]?.payload?.timestampIso
                 ? new Intl.DateTimeFormat("en-US", {
