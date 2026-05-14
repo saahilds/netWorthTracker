@@ -10,7 +10,7 @@ import {
   type TrendRangeKey
 } from "@networth/shared";
 import { StatusBar } from "expo-status-bar";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Pressable,
   SafeAreaView,
@@ -179,6 +179,8 @@ export default function App() {
   const [sortField, setSortField] = useState<SortField>("value");
   const [includeLiabilities, setIncludeLiabilities] = useState(true);
   const [scrubbedIndex, setScrubbedIndex] = useState<number | null>(null);
+  const [scrubLocked, setScrubLocked] = useState(false);
+  const scrubMovedRef = useRef(false);
 
   const history = useMemo(() => {
     const byRange = filterHistoryByRange(dummyNetWorthHistory, selectedRange);
@@ -386,6 +388,35 @@ export default function App() {
     setScrubbedIndex(index);
   };
 
+  const onTrendResponderGrant = (locationX: number) => {
+    scrubMovedRef.current = false;
+    handleTrendScrub(locationX);
+  };
+
+  const onTrendResponderMove = (locationX: number) => {
+    scrubMovedRef.current = true;
+    handleTrendScrub(locationX);
+  };
+
+  const onTrendResponderRelease = () => {
+    if (scrubLocked) {
+      if (!scrubMovedRef.current) {
+        // Tap while locked unlocks and clears the sticky tooltip.
+        setScrubLocked(false);
+        setScrubbedIndex(null);
+      }
+      return;
+    }
+
+    if (!scrubMovedRef.current && scrubbedIndex !== null) {
+      // Tap once to lock the currently focused point.
+      setScrubLocked(true);
+      return;
+    }
+
+    setScrubbedIndex(null);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
@@ -560,10 +591,15 @@ export default function App() {
             style={styles.lineChartContainer}
             onStartShouldSetResponder={() => true}
             onMoveShouldSetResponder={() => true}
-            onResponderGrant={(event) => handleTrendScrub(event.nativeEvent.locationX)}
-            onResponderMove={(event) => handleTrendScrub(event.nativeEvent.locationX)}
-            onResponderRelease={() => setScrubbedIndex(null)}
-            onResponderTerminate={() => setScrubbedIndex(null)}
+            onResponderGrant={(event) => onTrendResponderGrant(event.nativeEvent.locationX)}
+            onResponderMove={(event) => onTrendResponderMove(event.nativeEvent.locationX)}
+            onResponderRelease={onTrendResponderRelease}
+            onResponderTerminate={() => {
+              scrubMovedRef.current = false;
+              if (!scrubLocked) {
+                setScrubbedIndex(null);
+              }
+            }}
           >
             <Svg width={chartWidth} height={chartHeight} style={styles.lineChart}>
               {chartGeometry.polylines.map((line) => (
@@ -622,6 +658,9 @@ export default function App() {
               <Text style={styles.scrubTooltipDate}>
                 {formatTrendTimestamp(scrubbedPoint.timestampIso, selectedRange)}
               </Text>
+              <Text style={styles.scrubLockState}>
+                {scrubLocked ? "Locked (tap chart to unlock)" : "Tap chart to lock"}
+              </Text>
               {scrubbedLineValues.slice(0, 6).map((line) => (
                 <View key={line.id} style={styles.scrubTooltipRow}>
                   <View style={styles.scrubTooltipLabelWrap}>
@@ -635,7 +674,10 @@ export default function App() {
               ))}
             </View>
           ) : (
-            <Text style={styles.scrubHint}>Drag your finger across the chart to inspect values.</Text>
+            <Text style={styles.scrubHint}>
+              Drag your finger across the chart to inspect values. Tap once to lock, tap
+              again to unlock.
+            </Text>
           )}
         </View>
 
@@ -925,6 +967,11 @@ const styles = StyleSheet.create({
     color: "#334155",
     fontWeight: "700",
     marginBottom: 6
+  },
+  scrubLockState: {
+    fontSize: 11,
+    color: "#64748b",
+    marginBottom: 7
   },
   scrubTooltipRow: {
     flexDirection: "row",
