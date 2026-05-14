@@ -5,6 +5,7 @@ A starter monorepo scaffold for a personal net worth app with:
 - Web dashboard (Next.js)
 - Mobile dashboard shell (Expo React Native)
 - Shared TypeScript domain models and dummy portfolio data
+- Colorful UI cards plus holdings filters/sorting controls
 
 ## Budget options (US-only, Plaid-first)
 
@@ -76,3 +77,11 @@ For mobile:
 ```bash
 npm run dev:mobile
 ```
+
+## Cloud agent bootstrap
+
+```bash
+npm run setup:cloud
+```
+
+This command runs install, typecheck, and build from `/workspace`.

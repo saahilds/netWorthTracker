@@ -2,7 +2,7 @@
   color-scheme: light;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
-  background-color: #f6f7fb;
+  background-color: #eef2ff;
   color: #0f172a;
 }
 
@@ -12,7 +12,8 @@
 
 body {
   margin: 0;
-  background: #f6f7fb;
+  min-height: 100vh;
+  background: radial-gradient(circle at top right, #dbeafe 0%, #eef2ff 45%, #f8fafc 100%);
 }
 
 .page {
@@ -22,49 +23,75 @@ body {
 }
 
 .header {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 .header h1 {
   margin: 0;
-  font-size: 1.75rem;
+  font-size: 1.9rem;
 }
 
 .header p {
   margin-top: 0.4rem;
-  color: #475569;
+  color: #334155;
 }
 
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 0.8rem;
+  margin-bottom: 1.1rem;
 }
 
 .card {
-  background: white;
+  background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
   border-radius: 12px;
-  padding: 0.85rem;
-  border: 1px solid #e2e8f0;
+  padding: 0.95rem;
+  border: 1px solid #dbe6fb;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
 }
 
-.card h3 {
+.card-label {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
   color: #475569;
 }
 
 .card p {
-  margin: 0.3rem 0 0;
-  font-size: 1.1rem;
+  margin: 0.34rem 0 0;
+  font-size: 1.22rem;
   font-weight: 700;
+}
+
+.card-helper-text {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.card-tone-indigo {
+  border-top: 4px solid #6366f1;
+}
+
+.card-tone-emerald {
+  border-top: 4px solid #10b981;
+}
+
+.card-tone-rose {
+  border-top: 4px solid #ef4444;
+}
+
+.card-tone-amber {
+  border-top: 4px solid #f59e0b;
 }
 
 .panel-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.9rem;
+  gap: 1rem;
 }
 
 @media (min-width: 960px) {
@@ -74,10 +101,11 @@ body {
 }
 
 .panel {
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid #dbe6fb;
   border-radius: 12px;
-  padding: 0.95rem;
+  padding: 1rem;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
 }
 
 .panel h2 {
@@ -87,33 +115,155 @@ body {
 
 .panel-subtitle {
   margin-top: 0.35rem;
-  color: #64748b;
+  color: #475569;
   font-size: 0.85rem;
+}
+
+.table-controls {
+  margin-top: 0.8rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.6rem;
+}
+
+.control-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+}
+
+.control-field span {
+  font-size: 0.72rem;
+  color: #475569;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.control-input,
+.control-select {
+  height: 2.1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  padding: 0 0.6rem;
+  font-size: 0.84rem;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.control-input:focus,
+.control-select:focus {
+  outline: 2px solid #a5b4fc;
+  border-color: #6366f1;
+}
+
+.control-checkbox {
+  margin-top: 1.3rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #334155;
+  font-size: 0.83rem;
+}
+
+.table-meta {
+  margin: 0.7rem 0 0;
+  font-size: 0.78rem;
+  color: #475569;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 0.7rem;
+  margin-top: 0.75rem;
+  background: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 th,
 td {
   text-align: left;
   border-bottom: 1px solid #e2e8f0;
-  padding: 0.45rem 0.2rem;
+  padding: 0.54rem 0.32rem;
   font-size: 0.87rem;
 }
 
 th {
-  color: #475569;
+  color: #334155;
   font-weight: 600;
+  background: #f8fafc;
 }
 
 .positive {
-  color: #15803d;
+  color: #059669;
 }
 
 .negative {
-  color: #b91c1c;
+  color: #dc2626;
+}
+
+.asset-pill {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.16rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.asset-pill-cash {
+  background: #dcfce7;
+  color: #166534;
+  border-color: #86efac;
+}
+
+.asset-pill-equity {
+  background: #e0e7ff;
+  color: #3730a3;
+  border-color: #a5b4fc;
+}
+
+.asset-pill-retirement {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-color: #93c5fd;
+}
+
+.asset-pill-alternative {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+.asset-pill-hard_asset {
+  background: #fce7f3;
+  color: #9d174d;
+  border-color: #f9a8d4;
+}
+
+.asset-pill-liability {
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+.progress-meter {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+  margin-bottom: 0.22rem;
+}
+
+.progress-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.progress-label {
+  color: #475569;
+  font-size: 0.73rem;
 }

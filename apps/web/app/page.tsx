@@ -26,20 +26,31 @@ export default function HomePage() {
       </header>
 
       <section className="card-grid">
-        <DashboardCard label="Net Worth" value={currencyFormatter.format(summary.netWorth)} />
+        <DashboardCard
+          label="Net Worth"
+          value={currencyFormatter.format(summary.netWorth)}
+          tone="indigo"
+          helperText="Assets minus liabilities"
+        />
         <DashboardCard
           label="Total Assets"
           value={currencyFormatter.format(summary.totalAssets)}
+          tone="emerald"
+          helperText="Includes investment + cash + hard assets"
         />
         <DashboardCard
           label="Total Liabilities"
           value={currencyFormatter.format(summary.totalLiabilities)}
           emphasis="negative"
+          tone="rose"
+          helperText="Credit and debt balances"
         />
         <DashboardCard
           label="Unrealized Gain/Loss"
           value={currencyFormatter.format(summary.unrealizedGain)}
           emphasis={summary.unrealizedGain < 0 ? "negative" : "positive"}
+          tone="amber"
+          helperText="Based on available cost basis"
         />
       </section>
 
