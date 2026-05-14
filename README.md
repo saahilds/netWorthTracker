@@ -82,6 +82,13 @@ npm run dev:mobile
 If Expo cannot resolve `../../App` in a monorepo, ensure the mobile workspace uses
 `apps/mobile/index.ts` as the entrypoint (already configured in this repo).
 
+If you hit a React Native version mismatch, reinstall and clear Metro cache:
+
+```bash
+npm install
+npm run start --workspace @networth/mobile -- --clear
+```
+
 ## Cloud agent bootstrap
 
 ```bash
