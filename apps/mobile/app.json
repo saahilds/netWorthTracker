@@ -1,0 +1,9 @@
+{
+  "expo": {
+    "name": "Net Worth Tracker",
+    "slug": "net-worth-tracker",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light"
+  }
+}
