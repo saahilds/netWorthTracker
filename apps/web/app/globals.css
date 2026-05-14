@@ -24,6 +24,11 @@ body {
 
 .header {
   margin-bottom: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
 }
 
 .header h1 {
@@ -34,6 +39,19 @@ body {
 .header p {
   margin-top: 0.4rem;
   color: #334155;
+}
+
+.header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+}
+
+.header-email {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #475569;
 }
 
 .card-grid {
@@ -121,6 +139,102 @@ body {
   margin-top: 0.35rem;
   color: #475569;
   font-size: 0.85rem;
+}
+
+.auth-panel {
+  max-width: 720px;
+}
+
+.action-button {
+  border: 1px solid #312e81;
+  background: #312e81;
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 0.5rem 0.85rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.subtle-action-button {
+  border-color: #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+.onboarding-header {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.onboarding-actions {
+  display: flex;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.status-message {
+  margin-top: 0.7rem;
+  margin-bottom: 0;
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+.connection-grid {
+  margin-top: 0.9rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.7rem;
+}
+
+.connection-card {
+  border: 1px solid #dbe6fb;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0.7rem;
+}
+
+.connection-card h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.connection-card p {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+.unsupported-placeholder-box {
+  margin-top: 0.95rem;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  padding: 0.72rem;
+  background: #f8fafc;
+}
+
+.unsupported-placeholder-box h3 {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.unsupported-placeholder-box ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.unsupported-placeholder-box li {
+  color: #475569;
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
 }
 
 .chart-shell {

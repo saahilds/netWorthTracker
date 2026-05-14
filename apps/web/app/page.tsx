@@ -1,5 +1,5 @@
 import {
-  accountLabels,
+  accountLabels as sharedAccountLabels,
   dummyNetWorthHistory,
   dummySnapshot,
   summarizeByAssetClass,
@@ -8,10 +8,14 @@ import {
 } from "@networth/shared";
 import { AssetClassPieChart } from "../components/asset-class-pie-chart";
 import { AssetClassTable } from "../components/asset-class-table";
+import { SignInButton, SignOutButton } from "../components/auth-buttons";
 import { DashboardCard } from "../components/dashboard-card";
 import { DailyMovers } from "../components/daily-movers";
 import { HoldingsTable } from "../components/holdings-table";
 import { NetWorthTrendChart } from "../components/net-worth-trend-chart";
+import { PlaidConnectionPanel } from "../components/plaid-connection-panel";
+import { getAuthSession } from "../lib/auth";
+import { getDashboardPortfolioData } from "../lib/portfolio-data";
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -23,18 +27,55 @@ const timestampFormatter = new Intl.DateTimeFormat("en-US", {
   timeStyle: "short"
 });
 
-export default function HomePage() {
-  const summary = summarizeSnapshot(dummySnapshot);
-  const assetClassTotals = summarizeByAssetClass(dummySnapshot);
-  const labelsByAccount = accountLabels(dummySnapshot);
-  const movers = topMovers(dummySnapshot, 3);
-  const asOf = timestampFormatter.format(new Date(dummySnapshot.timestampIso));
+const UNSUPPORTED_PLACEHOLDERS = ["Kalshi", "WEX", "HealthEquity", "Transamerica"];
+
+export default async function HomePage() {
+  const session = await getAuthSession();
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  const sessionUser = session?.user;
+
+  if (!userId) {
+    return (
+      <main className="page">
+        <section className="panel panel-span-wide auth-panel">
+          <h1>Connect your accounts and track live net worth</h1>
+          <p className="panel-subtitle">
+            Sign in to begin onboarding, connect Plaid institutions, and sync balances,
+            transactions, and holdings.
+          </p>
+          <SignInButton />
+        </section>
+      </main>
+    );
+  }
+
+  const portfolioData = await getDashboardPortfolioData(userId);
+  const snapshot = portfolioData.snapshot ?? dummySnapshot;
+  const history = portfolioData.history.length > 0 ? portfolioData.history : dummyNetWorthHistory;
+  const labelsByAccount =
+    Object.keys(portfolioData.accountLabels).length > 0
+      ? portfolioData.accountLabels
+      : sharedAccountLabels(snapshot);
+
+  const summary = summarizeSnapshot(snapshot);
+  const assetClassTotals = summarizeByAssetClass(snapshot);
+  const movers = topMovers(snapshot, 3);
+  const asOf = timestampFormatter.format(new Date(snapshot.timestampIso));
 
   return (
     <main className="page">
       <header className="header">
-        <h1>Net Worth Tracker</h1>
-        <p>As of {asOf} (dummy data scaffold)</p>
+        <div>
+          <h1>Net Worth Tracker</h1>
+          <p>
+            As of {asOf}
+            {portfolioData.snapshot ? "" : " (demo fallback while you onboard Plaid)"}
+          </p>
+        </div>
+        <div className="header-actions">
+          <p className="header-email">{sessionUser?.email ?? "Signed in"}</p>
+          <SignOutButton />
+        </div>
       </header>
 
       <section className="card-grid">
@@ -67,12 +108,16 @@ export default function HomePage() {
       </section>
 
       <section className="panel-grid">
+        <PlaidConnectionPanel
+          connections={portfolioData.connections}
+          unsupportedInstitutionPlaceholders={UNSUPPORTED_PLACEHOLDERS}
+        />
         <article className="panel panel-span-wide">
           <h2>Net Worth Trend</h2>
           <p className="panel-subtitle">
             Hoverable performance chart with selectable time ranges and lines.
           </p>
-          <NetWorthTrendChart history={dummyNetWorthHistory} accountLabels={labelsByAccount} />
+          <NetWorthTrendChart history={history} accountLabels={labelsByAccount} />
         </article>
         <article className="panel">
           <h2>Asset Class Pie</h2>
@@ -94,7 +139,7 @@ export default function HomePage() {
         <article className="panel panel-span-wide">
           <h2>Holdings Detail</h2>
           <p className="panel-subtitle">Summary-level today, tax-lot detail later.</p>
-          <HoldingsTable snapshot={dummySnapshot} />
+          <HoldingsTable snapshot={snapshot} />
         </article>
       </section>
     </main>

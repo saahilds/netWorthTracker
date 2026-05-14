@@ -73,6 +73,34 @@ npm install
 npm run dev:web
 ```
 
+### Backend setup (Auth + Plaid + Prisma)
+
+1. Copy environment template:
+
+```bash
+cp .env.example .env
+```
+
+2. Fill in:
+   - `DATABASE_URL`
+   - `AUTH_SECRET`
+   - OAuth credentials (`AUTH_GITHUB_*` or `AUTH_GOOGLE_*`)
+   - Plaid credentials (`PLAID_CLIENT_ID`, `PLAID_SECRET`, `PLAID_ENV`)
+   - `APP_ENCRYPTION_KEY` (base64 32-byte value)
+
+3. Run Prisma migration + client generation:
+
+```bash
+npm run db:migrate
+npm run db:generate
+```
+
+4. Start web app and sign in, then connect Plaid:
+
+```bash
+npm run dev:web
+```
+
 For mobile:
 
 ```bash
