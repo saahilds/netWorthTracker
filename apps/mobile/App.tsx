@@ -21,7 +21,7 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
-import Svg, { Path, Polyline } from "react-native-svg";
+import Svg, { Circle, Line as SvgLine, Path, Polyline } from "react-native-svg";
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -104,6 +104,45 @@ function downsampleHistory<T>(values: T[], maxPoints: number): T[] {
   return values.filter((_, index) => index % step === 0 || index === values.length - 1);
 }
 
+function formatTrendTimestamp(timestampIso: string, range: TrendRangeKey): string {
+  const timestamp = new Date(timestampIso);
+
+  if (range === "1D") {
+    return new Intl.DateTimeFormat("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short"
+    }).format(timestamp);
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric"
+  }).format(timestamp);
+}
+
+function formatXAxisTick(timestampIso: string, range: TrendRangeKey): string {
+  const timestamp = new Date(timestampIso);
+  if (range === "1D") {
+    return new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit"
+    }).format(timestamp);
+  }
+
+  if (range === "5Y" || range === "MAX") {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      year: "2-digit"
+    }).format(timestamp);
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric"
+  }).format(timestamp);
+}
+
 type MetricCardProps = {
   label: string;
   value: string;
@@ -139,6 +178,7 @@ export default function App() {
   const [assetClassFilter, setAssetClassFilter] = useState<AssetClass | "all">("all");
   const [sortField, setSortField] = useState<SortField>("value");
   const [includeLiabilities, setIncludeLiabilities] = useState(true);
+  const [scrubbedIndex, setScrubbedIndex] = useState<number | null>(null);
 
   const history = useMemo(() => {
     const byRange = filterHistoryByRange(dummyNetWorthHistory, selectedRange);
@@ -223,15 +263,49 @@ export default function App() {
     const toX = (index: number) =>
       chartPadding + (index / Math.max(history.length - 1, 1)) * (chartWidth - chartPadding * 2);
 
-    const polylines = lines.map((line) => ({
-      ...line,
-      points: line.values
-        .map((value, index) => `${toX(index)},${toY(value)}`)
-        .join(" ")
-    }));
+    const xCoordinates = history.map((_, index) => toX(index));
+    const polylines = lines.map((line) => {
+      const coordinates = line.values.map((value, index) => ({
+        x: toX(index),
+        y: toY(value)
+      }));
 
-    return { polylines, minValue, maxValue };
+      return {
+        ...line,
+        coordinates,
+        points: coordinates.map((coordinate) => `${coordinate.x},${coordinate.y}`).join(" ")
+      };
+    });
+
+    return { polylines, minValue, maxValue, xCoordinates };
   }, [chartHeight, chartPadding, chartWidth, history.length, lines]);
+
+  const xAxisTicks = useMemo(() => {
+    if (history.length === 0) {
+      return [];
+    }
+
+    const indexSet = new Set([0, Math.floor((history.length - 1) / 2), history.length - 1]);
+    return [...indexSet]
+      .sort((left, right) => left - right)
+      .map((index) => ({
+        index,
+        label: formatXAxisTick(history[index].timestampIso, selectedRange)
+      }));
+  }, [history, selectedRange]);
+
+  const scrubbedPoint = scrubbedIndex === null ? null : history[scrubbedIndex] ?? null;
+  const scrubbedLineValues =
+    scrubbedIndex === null
+      ? []
+      : chartGeometry.polylines
+          .map((line) => ({
+            id: line.id,
+            label: line.label,
+            color: line.color,
+            value: line.values[scrubbedIndex]
+          }))
+          .filter((line) => typeof line.value === "number");
 
   const holdings = useMemo(
     () =>
@@ -299,6 +373,19 @@ export default function App() {
     );
   };
 
+  const handleTrendScrub = (locationX: number) => {
+    if (history.length === 0) {
+      return;
+    }
+
+    const minX = chartPadding;
+    const maxX = chartWidth - chartPadding;
+    const clampedX = Math.max(minX, Math.min(maxX, locationX));
+    const ratio = (clampedX - minX) / Math.max(maxX - minX, 1);
+    const index = Math.round(ratio * (history.length - 1));
+    setScrubbedIndex(index);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
@@ -327,6 +414,34 @@ export default function App() {
             value={currencyFormatter.format(summary.unrealizedGain)}
             color="#f59e0b"
           />
+        </View>
+
+        <View style={styles.panel}>
+          <Text style={styles.panelTitle}>Daily Movers</Text>
+          <View style={styles.moverColumns}>
+            <View style={[styles.moverCard, styles.gainersCard]}>
+              <Text style={styles.moverTitle}>Top Gainers</Text>
+              {movers.gainers.map((mover) => (
+                <View key={mover.id} style={styles.moverRow}>
+                  <Text style={styles.moverName}>{mover.symbol ?? mover.name}</Text>
+                  <Text style={styles.positive}>
+                    +{percentFormatter.format(mover.dayChangePct / 100)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+            <View style={[styles.moverCard, styles.losersCard]}>
+              <Text style={styles.moverTitle}>Top Losers</Text>
+              {movers.losers.map((mover) => (
+                <View key={mover.id} style={styles.moverRow}>
+                  <Text style={styles.moverName}>{mover.symbol ?? mover.name}</Text>
+                  <Text style={styles.negative}>
+                    {percentFormatter.format(mover.dayChangePct / 100)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
         </View>
 
         <View style={styles.panel}>
@@ -441,49 +556,87 @@ export default function App() {
             ))}
           </View>
 
-          <Svg width={chartWidth} height={chartHeight} style={styles.lineChart}>
-            {chartGeometry.polylines.map((line) => (
-              <Polyline
-                key={line.id}
-                points={line.points}
-                fill="none"
-                stroke={line.color}
-                strokeWidth={line.id === "netWorth" ? 2.8 : 1.8}
-              />
-            ))}
-          </Svg>
+          <View
+            style={styles.lineChartContainer}
+            onStartShouldSetResponder={() => true}
+            onMoveShouldSetResponder={() => true}
+            onResponderGrant={(event) => handleTrendScrub(event.nativeEvent.locationX)}
+            onResponderMove={(event) => handleTrendScrub(event.nativeEvent.locationX)}
+            onResponderRelease={() => setScrubbedIndex(null)}
+            onResponderTerminate={() => setScrubbedIndex(null)}
+          >
+            <Svg width={chartWidth} height={chartHeight} style={styles.lineChart}>
+              {chartGeometry.polylines.map((line) => (
+                <Polyline
+                  key={line.id}
+                  points={line.points}
+                  fill="none"
+                  stroke={line.color}
+                  strokeWidth={line.id === "netWorth" ? 2.8 : 1.8}
+                />
+              ))}
+              {scrubbedIndex !== null ? (
+                <SvgLine
+                  x1={chartGeometry.xCoordinates[scrubbedIndex]}
+                  y1={chartPadding}
+                  x2={chartGeometry.xCoordinates[scrubbedIndex]}
+                  y2={chartHeight - chartPadding}
+                  stroke="#334155"
+                  strokeDasharray="4 4"
+                  strokeWidth={1}
+                />
+              ) : null}
+              {scrubbedIndex !== null
+                ? chartGeometry.polylines.map((line) => {
+                    const coordinate = line.coordinates[scrubbedIndex];
+                    if (!coordinate) {
+                      return null;
+                    }
+
+                    return (
+                      <Circle
+                        key={`${line.id}-scrub-point`}
+                        cx={coordinate.x}
+                        cy={coordinate.y}
+                        r={3.7}
+                        fill={line.color}
+                      />
+                    );
+                  })
+                : null}
+            </Svg>
+          </View>
           <View style={styles.axisRow}>
             <Text style={styles.axisText}>{currencyCompactFormatter.format(chartGeometry.minValue)}</Text>
             <Text style={styles.axisText}>{currencyCompactFormatter.format(chartGeometry.maxValue)}</Text>
           </View>
-        </View>
-
-        <View style={styles.panel}>
-          <Text style={styles.panelTitle}>Daily Movers</Text>
-          <View style={styles.moverColumns}>
-            <View style={[styles.moverCard, styles.gainersCard]}>
-              <Text style={styles.moverTitle}>Top Gainers</Text>
-              {movers.gainers.map((mover) => (
-                <View key={mover.id} style={styles.moverRow}>
-                  <Text style={styles.moverName}>{mover.symbol ?? mover.name}</Text>
-                  <Text style={styles.positive}>
-                    +{percentFormatter.format(mover.dayChangePct / 100)}
-                  </Text>
-                </View>
-              ))}
-            </View>
-            <View style={[styles.moverCard, styles.losersCard]}>
-              <Text style={styles.moverTitle}>Top Losers</Text>
-              {movers.losers.map((mover) => (
-                <View key={mover.id} style={styles.moverRow}>
-                  <Text style={styles.moverName}>{mover.symbol ?? mover.name}</Text>
-                  <Text style={styles.negative}>
-                    {percentFormatter.format(mover.dayChangePct / 100)}
-                  </Text>
-                </View>
-              ))}
-            </View>
+          <View style={styles.xAxisRow}>
+            {xAxisTicks.map((tick) => (
+              <Text key={`x-axis-${tick.index}`} style={styles.xAxisText}>
+                {tick.label}
+              </Text>
+            ))}
           </View>
+          {scrubbedPoint ? (
+            <View style={styles.scrubTooltip}>
+              <Text style={styles.scrubTooltipDate}>
+                {formatTrendTimestamp(scrubbedPoint.timestampIso, selectedRange)}
+              </Text>
+              {scrubbedLineValues.slice(0, 6).map((line) => (
+                <View key={line.id} style={styles.scrubTooltipRow}>
+                  <View style={styles.scrubTooltipLabelWrap}>
+                    <View style={[styles.scrubTooltipDot, { backgroundColor: line.color }]} />
+                    <Text style={styles.scrubTooltipLabel}>{line.label}</Text>
+                  </View>
+                  <Text style={styles.scrubTooltipValue}>
+                    {currencyCompactFormatter.format(line.value)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.scrubHint}>Drag your finger across the chart to inspect values.</Text>
+          )}
         </View>
 
         <View style={styles.panel}>
@@ -731,10 +884,15 @@ const styles = StyleSheet.create({
     fontWeight: "600"
   },
   lineChart: {
+    borderRadius: 10
+  },
+  lineChartContainer: {
     marginTop: 12,
     borderWidth: 1,
     borderColor: "#dbe6fb",
-    borderRadius: 10
+    borderRadius: 10,
+    backgroundColor: "#f8fafc",
+    overflow: "hidden"
   },
   axisRow: {
     marginTop: 6,
@@ -744,6 +902,60 @@ const styles = StyleSheet.create({
   axisText: {
     fontSize: 12,
     color: "#64748b"
+  },
+  xAxisRow: {
+    marginTop: 4,
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  xAxisText: {
+    fontSize: 11,
+    color: "#64748b"
+  },
+  scrubTooltip: {
+    marginTop: 9,
+    borderWidth: 1,
+    borderColor: "#dbe6fb",
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: "#f8fafc"
+  },
+  scrubTooltipDate: {
+    fontSize: 12,
+    color: "#334155",
+    fontWeight: "700",
+    marginBottom: 6
+  },
+  scrubTooltipRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4
+  },
+  scrubTooltipLabelWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    maxWidth: "70%"
+  },
+  scrubTooltipDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 999,
+    marginRight: 6
+  },
+  scrubTooltipLabel: {
+    fontSize: 12,
+    color: "#475569"
+  },
+  scrubTooltipValue: {
+    fontSize: 12,
+    color: "#0f172a",
+    fontWeight: "700"
+  },
+  scrubHint: {
+    marginTop: 8,
+    color: "#64748b",
+    fontSize: 12
   },
   moverColumns: {
     marginTop: 10,
