@@ -22,6 +22,7 @@ export interface Holding {
   price?: number;
   value: number;
   costBasis?: number;
+  dayChangePct?: number;
   assetClass: AssetClass;
 }
 
@@ -36,4 +37,11 @@ export interface Account {
 export interface NetWorthSnapshot {
   timestampIso: string;
   accounts: Account[];
+}
+
+export interface NetWorthHistoryPoint {
+  timestampIso: string;
+  netWorth: number;
+  byAssetClass: Record<AssetClass, number>;
+  byAccount: Record<string, number>;
 }

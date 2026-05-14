@@ -6,6 +6,7 @@ A starter monorepo scaffold for a personal net worth app with:
 - Mobile dashboard shell (Expo React Native)
 - Shared TypeScript domain models and dummy portfolio data
 - Colorful UI cards plus holdings filters/sorting controls
+- Interactive pie/line charts and daily movers leaderboard
 
 ## Budget options (US-only, Plaid-first)
 

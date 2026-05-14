@@ -13,7 +13,8 @@
     "@networth/shared": "file:../../packages/shared",
     "next": "^16.0.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "recharts": "^3.8.1"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
