@@ -84,7 +84,7 @@ cp .env.example .env
 2. Fill in:
    - `DATABASE_URL`
    - `AUTH_SECRET`
-   - OAuth credentials (`AUTH_GITHUB_*` or `AUTH_GOOGLE_*`)
+   - Google OAuth credentials (`AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`)
    - Plaid credentials (`PLAID_CLIENT_ID`, `PLAID_SECRET`, `PLAID_ENV`)
    - `APP_ENCRYPTION_KEY` (base64 32-byte value)
 

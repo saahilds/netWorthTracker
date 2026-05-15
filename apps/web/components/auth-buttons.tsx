@@ -6,9 +6,9 @@ interface SignInButtonProps {
   label?: string;
 }
 
-export function SignInButton({ label = "Sign in with OAuth" }: SignInButtonProps) {
+export function SignInButton({ label = "Sign in with Google" }: SignInButtonProps) {
   return (
-    <button className="action-button" onClick={() => signIn()} type="button">
+    <button className="action-button" onClick={() => signIn("google")} type="button">
       {label}
     </button>
   );

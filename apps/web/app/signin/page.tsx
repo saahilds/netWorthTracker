@@ -13,10 +13,11 @@ export default async function SignInPage() {
       <section className="panel panel-span-wide auth-panel">
         <h1>Sign in to Net Worth Tracker</h1>
         <p className="panel-subtitle">
-          OAuth sign-in is enabled for onboarding and Plaid account linking. In local development,
-          a fallback email sign-in is available when OAuth credentials are not configured.
+          Google OAuth is enabled for onboarding and Plaid account linking. In local
+          development, a fallback email sign-in is available if Google credentials are not
+          configured.
         </p>
-        <SignInButton label="Continue" />
+        <SignInButton />
       </section>
     </main>
   );

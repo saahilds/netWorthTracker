@@ -2,7 +2,7 @@
 
 This implementation uses:
 
-- Auth.js (OAuth-capable) + Prisma adapter
+- Auth.js (Google OAuth) + Prisma adapter
 - Postgres + Prisma schema
 - Plaid Link + public token exchange
 - Sync pipeline (initial connect, manual refresh, webhook, scheduled endpoint)
